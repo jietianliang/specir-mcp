@@ -1,5 +1,7 @@
 # specir-mcp
 
+[English](README.md) | [简体中文](README_zh-CN.md)
+
 `specir-mcp` is a data-neutral framework for turning technical documents into
 a structured intermediate representation (SpecIR) and querying it through five
 stable MCP tools.
