@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+
+# User-owned inputs and generated knowledge bases
+data/
+specs/
+parsed*/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.pdf
+*.safetensors
+*.zip
+*.tar
+*.tar.gz
+
+# Local tools and credentials
+.env*
+.claude/
+.cursor/
+.opencode/
+.vscode/
+opencode.json

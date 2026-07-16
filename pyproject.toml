@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "specir-mcp"
+version = "0.1.0"
+description = "A data-neutral SpecIR framework with a five-tool MCP query server"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{name = "SpecIR contributors"}]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "fastmcp>=2.0",
+  "pymupdf>=1.23",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "build>=1"]
+
+[project.scripts]
+specir-mcp-server = "specir.query.server:main"
+specir-demo = "specir.demo.builder:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"specir.demo" = ["fixture.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["src"]
