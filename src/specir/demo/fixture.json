@@ -31,7 +31,7 @@
       "title": "Read Telemetry command",
       "level": 2,
       "parent_uid": "acme-device:2",
-      "text": "Read Telemetry returns a fictional temperature sample. The command identifier is A1h.",
+      "text": "Read Telemetry returns a fictional temperature sample. An unsupported selector shall complete with Invalid Sample Request. The command identifier is A1h.",
       "page_start": 2,
       "page_end": 2
     },
@@ -87,12 +87,28 @@
       "payload": {"direction": "device-to-host", "response_bytes": 4}
     },
     {
-      "uid": "acme-device:status:00h",
+      "uid": "acme-device:status:01h",
       "kind": "status",
-      "identifier": "00h",
-      "name": "Completed",
+      "identifier": "01h",
+      "name": "Invalid Sample Request",
       "section_uid": "acme-device:2.1",
-      "payload": {"meaning": "The fictional operation completed successfully."}
+      "payload": {"meaning": "The fictional selector is not supported."}
+    },
+    {
+      "uid": "acme-device:feature:01h",
+      "kind": "feature",
+      "identifier": "01h",
+      "name": "Telemetry Sampling",
+      "section_uid": "acme-device:2.1",
+      "payload": {"listed_in_uid": "acme-device:table:1"}
+    },
+    {
+      "uid": "acme-device:field:mode",
+      "kind": "field",
+      "identifier": "CTRL.MODE",
+      "name": "MODE",
+      "section_uid": "acme-device:3.1",
+      "payload": {"parent_uid": "acme-device:register:ctrl", "bit_range": "2:1"}
     },
     {
       "uid": "acme-device:register:ctrl",
@@ -123,8 +139,18 @@
   "edges": [
     {
       "src": "acme-device:2.1",
-      "dst": "acme-device:command:a1h",
-      "type": "defines"
+      "dst": "acme-device:figure:1",
+      "type": "describes"
+    },
+    {
+      "src": "acme-device:2.1",
+      "dst": "acme-device:1",
+      "type": "boilerplate"
+    },
+    {
+      "src": "acme-device:1",
+      "dst": "acme-device:2.1",
+      "type": "references"
     },
     {
       "src": "acme-device:requirement:telemetry-enabled",

@@ -1,4 +1,4 @@
-"""Stable five-tool facade over :class:`SpecIRQueryEngine`."""
+"""Stable six-tool facade over :class:`SpecIRQueryEngine`."""
 from __future__ import annotations
 
 import json
@@ -14,6 +14,7 @@ TOOL_NAMES = (
     "specir_explain",
     "specir_search",
     "specir_status",
+    "specir_validate",
 )
 
 
@@ -40,9 +41,16 @@ def resolve(kind: str, id: str, spec: str = "auto") -> dict[str, Any]:
     return engine.resolve(kind, id, spec) if engine else _no_engine()
 
 
-def fetch(uid: str, include_xrefs: bool = False) -> dict[str, Any]:
+def fetch(
+    uid: str, include_xrefs: bool = False, xref_depth: int = 1,
+    xref_direction: str = "outgoing", xref_profile: str = "test_points",
+    include_children: str = "auto",
+) -> dict[str, Any]:
     engine = _engine()
-    return engine.fetch(uid, include_xrefs) if engine else _no_engine()
+    return engine.fetch(
+        uid, include_xrefs, xref_depth, xref_direction,
+        xref_profile, include_children,
+    ) if engine else _no_engine()
 
 
 def explain(
@@ -76,6 +84,11 @@ def status(manager: Any = None) -> dict[str, Any]:
     return payload
 
 
+def validate(mode: str = "summary") -> dict[str, Any]:
+    engine = _engine()
+    return engine.validate(mode) if engine else _no_engine()
+
+
 def dumps(payload: Any) -> str:
     return json.dumps(payload, indent=2, ensure_ascii=False)
 
@@ -87,9 +100,17 @@ def register_tools(mcp: Any, manager: Any = None) -> list[str]:
         return dumps(resolve(kind, id, spec))
 
     @mcp.tool()
-    def specir_fetch(uid: str, include_xrefs: bool = False) -> str:
-        """Fetch an entity by canonical UID, optionally with graph edges."""
-        return dumps(fetch(uid, include_xrefs))
+    def specir_fetch(
+        uid: str, include_xrefs: bool = False, xref_depth: int = 1,
+        xref_direction: str = "outgoing",
+        xref_profile: str = "test_points",
+        include_children: str = "auto",
+    ) -> str:
+        """Fetch an entity with ranked related_entities and complete xrefs_raw."""
+        return dumps(fetch(
+            uid, include_xrefs, xref_depth, xref_direction,
+            xref_profile, include_children,
+        ))
 
     @mcp.tool()
     def specir_explain(
@@ -110,5 +131,10 @@ def register_tools(mcp: Any, manager: Any = None) -> list[str]:
     def specir_status() -> str:
         """Report plugin state and database coverage."""
         return dumps(status(manager))
+
+    @mcp.tool()
+    def specir_validate(mode: str = "summary") -> str:
+        """Read persisted build/extraction issue summaries or findings."""
+        return dumps(validate(mode))
 
     return list(TOOL_NAMES)

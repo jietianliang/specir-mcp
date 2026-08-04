@@ -1,4 +1,4 @@
-"""Five-tool FastMCP server for SpecIR."""
+"""Six-tool FastMCP server for SpecIR."""
 from __future__ import annotations
 
 from fastmcp import FastMCP
@@ -15,7 +15,9 @@ def build(name: str = "specir-mcp") -> FastMCP:
         instructions=(
             "Data-neutral SpecIR query server. Use resolve for exact identifiers, "
             "fetch for canonical UIDs, explain for entity-plus-section views, "
-            "search for discovery, and status for coverage. "
+            "search for discovery, status for coverage, and validate for "
+            "persisted quality findings. Fetch defaults to product-ranked "
+            "test_points references; use generic for unfiltered debugging. "
             "A no-data response indicates extraction coverage, not necessarily "
             "absence from the user's source document."
         ),

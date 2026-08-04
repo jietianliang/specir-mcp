@@ -25,9 +25,15 @@ def test_demo_resolve_fetch_explain_search_status(demo):
     fetched = engine.fetch("acme-device:2.1", include_xrefs=True)
     assert fetched["result"]["title"] == "Read Telemetry command"
     assert fetched["xrefs"]["outgoing"]
+    assert fetched["related_entities"]
+    assert fetched["xrefs_raw"]["profile"] == "test_points"
+    assert [item["uid"] for item in fetched["xrefs_raw"]["suppressed_references"]] == [
+        "acme-device:1"
+    ]
 
     explained = engine.explain("Read Telemetry", "command")
     assert explained["result"]["section"]["uid"] == "acme-device:2.1"
+    assert explained["result"]["related_entities"]
 
     searched = engine.search("telemetry", spec="acme-device")
     assert any(item["uid"] == "acme-device:2.1" for item in searched["result"])
@@ -40,12 +46,54 @@ def test_demo_resolve_fetch_explain_search_status(demo):
     assert status["entities_by_kind"]["command"] == 1
 
 
+def test_product_related_view_and_typed_edges(demo):
+    _, engine = demo
+    command = engine.fetch("acme-device:command:a1h", include_xrefs=True)
+    assert any(
+        item["uid"] == "acme-device:2.1"
+        and item["relation_type"] == "defines"
+        for item in command["related_entities"]
+    )
+    assert all(item["uid"] != "acme-device:1" for item in command["related_entities"])
+
+    generic = engine.fetch(
+        "acme-device:2.1", include_xrefs=True, xref_profile="generic"
+    )
+    assert any(item["uid"] == "acme-device:1" for item in generic["xrefs_raw"]["outgoing"])
+    assert all(item["uid"] != "acme-device:1" for item in generic["related_entities"])
+
+    feature = engine.fetch("acme-device:feature:01h", include_xrefs=True)
+    assert {
+        (item["type"], item["relation_type"])
+        for item in feature["related_entities"]
+    } >= {("section", "defines"), ("table", "listed_in")}
+
+    field = engine.fetch("acme-device:field:mode", include_xrefs=True)
+    assert any(
+        item["uid"] == "acme-device:register:ctrl"
+        and item["relation_type"] == "member_of"
+        for item in field["related_entities"]
+    )
+
+    section = engine.fetch("acme-device:2.1", include_xrefs=True)
+    assert any(
+        item["uid"] == "acme-device:status:01h"
+        and item["relation_type"] == "mentions_status"
+        for item in section["related_entities"]
+    )
+    both = engine.fetch(
+        "acme-device:2.1", include_xrefs=True, xref_direction="both"
+    )
+    assert any(item["uid"] == "acme-device:1" for item in both["xrefs_raw"]["incoming"])
+
+
 def test_tool_facade_and_json(demo, monkeypatch):
     path, _ = demo
     monkeypatch.setenv("SPEC_IR_DB", str(path))
     assert tools.resolve("register", "CTRL")["result"]["offset"] == "00h"
     assert tools.explain("Read Telemetry")["result"]["entity"]["identifier"] == "A1h"
     json.dumps(tools.status())
+    assert tools.validate()["result"] == {}
 
 
 def test_no_engine_degrades(monkeypatch):
