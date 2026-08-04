@@ -3,7 +3,7 @@
 [English](README.md) | [简体中文](README_zh-CN.md)
 
 `specir-mcp` is a data-neutral framework for turning technical documents into
-a structured intermediate representation (SpecIR) and querying it through five
+a structured intermediate representation (SpecIR) and querying it through six
 stable MCP tools.
 
 The repository contains no standards PDFs, extracted specification text,
@@ -16,9 +16,12 @@ All bundled demo content is fictional.
 - Extensible domain plugin manifests with dependency-aware loading.
 - PDF outline-based section extraction and reusable structure parsers.
 - SQLite-backed exact lookup, fetch, explanation, search, and status APIs.
-- A five-tool FastMCP surface:
+- A six-tool FastMCP surface:
   `specir_resolve`, `specir_fetch`, `specir_explain`, `specir_search`,
-  and `specir_status`.
+  `specir_status`, and `specir_validate`.
+- Product-ranked `related_entities` plus evidence-complete `xrefs_raw`.
+- Data-neutral typed edges for definitions, listings, field membership, and
+  named status mentions.
 - Explicit coverage metadata so missing extraction is not confused with absence
   from a source document.
 
@@ -46,11 +49,18 @@ Example MCP calls:
 
 ```text
 specir_resolve(kind="command", id="A1h", spec="acme-device")
-specir_fetch(uid="acme-device:2.1", include_xrefs=true)
+specir_fetch(uid="acme-device:2.1", include_xrefs=true,
+             xref_profile="test_points")
 specir_explain(name="Read Telemetry", kind="command", spec="acme-device")
 specir_search(query="telemetry", spec="acme-device")
 specir_status()
+specir_validate(mode="summary")
 ```
+
+`test_points` is the default fetch profile: weak or boilerplate edges remain
+auditable under `xrefs_raw.suppressed_references` but do not enter the ranked
+`related_entities` list. Request `xref_profile="generic"` for an unfiltered
+debug view.
 
 When a database contains one document, `spec="auto"` selects it. With multiple
 documents, exact lookups return candidates and request an explicit spec.

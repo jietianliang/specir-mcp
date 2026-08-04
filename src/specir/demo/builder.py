@@ -9,6 +9,7 @@ from pathlib import Path
 
 from specir.extractors.passages import chunk_text
 from specir.query.schema import create_database
+from specir.query.semantic_edges import rebuild_typed_entity_edges
 
 
 def build_demo(output: str | Path) -> Path:
@@ -88,6 +89,7 @@ def build_demo(output: str | Path) -> Path:
                     "fictional demo fixture", "curated",
                 ),
             )
+        rebuild_typed_entity_edges(connection, spec)
         connection.commit()
         if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
             raise RuntimeError("demo database integrity check failed")
